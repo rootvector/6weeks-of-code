@@ -77,10 +77,10 @@
  * ESC s: Saves the current cursor position. 
  * ESC u: Restores the cursor to the previously saved position. */
 
-#define CLEAR_SCREEN(N) printf("\033[%dJ", (N));
+#define CLEAR_SCR(N) printf("\033[%dJ", (N));
 #define CLEAR_IN_LINE(N) printf("\033[%dK", (N));
-#define HIDE_CURSOR() printf("\033[? 25 l");
-#define SHOW_CURSOR() printf("\033[? 25 h");
+#define HIDE_CURSOR() printf("\033[?25l");
+#define SHOW_CURSOR() printf("\033[?25h");
 #define SAVE_CURSOR_POS() printf("\033s");
 #define RESTORE_CURSOR_POS() printf("\033u");
 

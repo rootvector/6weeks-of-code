@@ -10,6 +10,7 @@ int main(){
 	int len = strlen(buffer);
 	int j=1;
 
+	CLEAR_SCR(2);
 	printf("%s%sred color white background%s\n", RED, BACK_WHITE, NOR);
 	MOVE_COLIN_ROW(30);
 	printf("%s%s\tBOLD BLUE text and green background\t%s\n", BLUE_B, BACK_GREEN, NOR);
@@ -32,5 +33,6 @@ int main(){
 	}
 	
 	printf("\n");
+	SHOW_CURSOR();
 	return 0;
 }
