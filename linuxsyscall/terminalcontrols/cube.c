@@ -5,7 +5,7 @@
 #define HEIGGT 250
 
 int main(){
-	int x = 40, y = 55, z = 40;
+	int x = 10, y = 55, z = 40;
 	int xb = x/z, yb = y/z;
 
 	CLEAR_SCR(2);
@@ -24,6 +24,6 @@ int main(){
 
 	printf("\n\n");
 	SHOW_CURSOR();
-
+	
 	return 0;
 }
