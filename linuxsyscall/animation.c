@@ -5,7 +5,7 @@
 int main(){
     int i;
     for(i = 0; i < 15; i++){
-        system("clear");
+	fflush(stdout);
         sleep(2);
         printf("\n\n%*s*", i, " ");
     }
