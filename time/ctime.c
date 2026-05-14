@@ -6,5 +6,6 @@ int main(){
 	char *cureent_time = ctime(&now);
 	printf("%s\n", cureent_time);
 	printf("%ld\n", now);
+
 	return 0;
 }
