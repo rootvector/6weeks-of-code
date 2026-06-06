@@ -1,5 +1,6 @@
 /* SIMPLE PORT SCANNER */
 /* Date: Fri Jun  5 10:22:07 PM +05 2026 */
+/* copyright: rootvector */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ int main(int argc, char *argv[]){
     int flag;
     int start, end;
 
+    system("clear");
     printf("ROOTVECTOR PORT SCANNER\n");
     if(argc < 3){
         printf("Usage: %s START ENDPORT TARGET SOCK_STREAM/SOCK_DGRAM\n\n"
@@ -93,4 +95,42 @@ int tcpscan(int start, int end, char target[16]){
 int udpscan(int start, int end, char target[16]){
     printf("START UDP SCAN FOR %s\n\n", target);
 
+    int st = start;
+    int res;
+
+    printf("\tPORT\tSTATE\n");
+    while(st <= end){
+        int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+        if(sockfd < 0){
+            perror("Socket Error ");
+            return -1;
+        }
+
+        struct sockaddr_in addr;
+
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(st);
+        addr.sin_addr.s_addr = inet_addr(target);
+
+        connect(sockfd, (struct sockaddr *)&addr, sizeof(addr));
+
+        const char *payload = "ping";
+
+        send(sockfd, payload, strlen(payload), 0);
+        usleep(100000);
+        
+        char buffer[BUF_SIZE];
+        res = recv(sockfd, buffer, sizeof(buffer), MSG_DONTWAIT);
+       // printf("IP %0x8\n", addr.sin_addr.s_addr);
+
+        if(!(res < 0 && errno == ECONNREFUSED)){
+            printf("\t%4d \tOPEN\n", st);
+        }else{
+            //printf("\t%4d \tCLOSED\n", st);
+        }
+
+       close(sockfd); 
+       st++;
+    }
 }
