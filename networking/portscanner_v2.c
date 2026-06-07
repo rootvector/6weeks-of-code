@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <ctype.h>
 
+#define BUFF_SIZE 1000
 #define DEF_PORTS 1000
 #define DEF_SCAN "SOCK_STREAM"
 #define UDP_SCAN "SOCK_DGRAM"
@@ -79,9 +80,11 @@ int main(int argc, char *argv[]){
     printf("\n\n");
 
     if((strcmp(DEF_SCAN, scantype)) == 0){
-        flag = tcpscan(start, end, target);
+        if(!(flag = tcpscan(start, end, target)))
+            printf("TCP SCAN DONE.\n");
     }else if((strcmp(UDP_SCAN, scantype)) == 0){
-        flag = udpscan(start, end, target);
+        if(!(flag = udpscan(start, end, target)))
+            printf("UDP SCAN DONE.\n");
     }else{
         printf("Scantype is invalid..\n");
     }
@@ -89,7 +92,7 @@ int main(int argc, char *argv[]){
 }
 
 
-void usage(char scanner[10]){
+void usage(const char *scanner){
 
         printf("Usage: %s -p START ENDPORT -t TARGET -type SOCK_STREAM/SOCK_DGRAM\n\n"
                 "OPTIONS\n"
