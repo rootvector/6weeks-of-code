@@ -11,22 +11,19 @@
 #include <errno.h>
 #include <ctype.h>
 
+#define BUFF_SIZE 1000
 #define DEF_PORTS 1000
-#define BUF_SIZE 1000
 #define DEF_SCAN "SOCK_STREAM"
 #define UDP_SCAN "SOCK_DGRAM"
 
-void usage(char scanner[10]);
+void usage(const char *scanner);
 
 int tcpscan(int start, int end, char target[16]);
 int udpscan(int start, int end, char target[16]);
 
 int main(int argc, char *argv[]){
-    char *buffer = (char*) malloc(BUF_SIZE);
-    char *target = (char*) malloc(16);
-    char *scantype = (char *) malloc(12);
-    strcpy(scantype, DEF_SCAN);
-    strcpy(target, "");
+    char target[16] = "";
+    char scantype[12] = DEF_SCAN;
     int flag;
     int start = 1, end = DEF_PORTS;
 
@@ -83,22 +80,19 @@ int main(int argc, char *argv[]){
     printf("\n\n");
 
     if((strcmp(DEF_SCAN, scantype)) == 0){
-        flag = tcpscan(start, end, target);
+        if(!(flag = tcpscan(start, end, target)))
+            printf("TCP SCAN DONE.\n");
     }else if((strcmp(UDP_SCAN, scantype)) == 0){
-        flag = udpscan(start, end, target);
+        if(!(flag = udpscan(start, end, target)))
+            printf("UDP SCAN DONE.\n");
     }else{
         printf("Scantype is invalid..\n");
     }
-
-
-    free(buffer);
-    free(target);
-    free(scantype);
     return 0;
 }
 
 
-void usage(char scanner[10]){
+void usage(const char *scanner){
 
         printf("Usage: %s -p START ENDPORT -t TARGET -type SOCK_STREAM/SOCK_DGRAM\n\n"
                 "OPTIONS\n"
@@ -130,6 +124,7 @@ int tcpscan(int start, int end, char target[16]){
         }
 
         struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
 
         addr.sin_family = AF_INET;
         addr.sin_port = htons(st);
@@ -137,17 +132,14 @@ int tcpscan(int start, int end, char target[16]){
 
         res = connect(sockfd, (struct sockaddr *)&addr, sizeof(addr));
        // printf("IP %0x8\n", addr.sin_addr.s_addr);
-        if(res < 0 && errno == ETIMEDOUT){
-            perror("Connection Error ");
-            return -1;
-        }else if(res == 0){
+        if(res == 0){
             printf("\t%4d \tOPEN\n", st);
         }
 
        close(sockfd); 
        st++;
     }
-
+return 0;
 }
 
 int udpscan(int start, int end, char target[16]){
@@ -166,6 +158,7 @@ int udpscan(int start, int end, char target[16]){
         }
 
         struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
 
         addr.sin_family = AF_INET;
         addr.sin_port = htons(st);
@@ -191,4 +184,5 @@ int udpscan(int start, int end, char target[16]){
        close(sockfd); 
        st++;
     }
+    return 0;
 }
