@@ -126,8 +126,11 @@ void grab_banner(const char target[INET_ADDRSTRLEN], const int port){
     int addrlen = sizeof(addr);
     char ping[] = "GET / HTTP/1.1\r\n"
         "Host: 127.0.0.1\r\n"
-        "Content-Type: text/html\r\n"
-        "Content-Length: 4096\r\n";
+        "User-Agent: Mozilla/5.0\r\n"
+        "Accept: text/html,appllication/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+        "Accept-Language: en-US,en;q=0.5\r\n"
+        "Accept-Encoding: gzip, deflate, br, zstd\r\n"
+        "Priorit: u=0\r\n\r\n";
     char buffer[BUF_SIZE];
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
@@ -140,23 +143,21 @@ void grab_banner(const char target[INET_ADDRSTRLEN], const int port){
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = inet_addr(target);
 
-    if((connect(sockfd, (struct sockaddr*)&addr, sizeof(addr))) < 0){
+    if((connect(sockfd, (struct sockaddr*)&addr, sizeof(addr))) >= 0){
+            printf("Port: %d is Open\n", port);
+            if((send(sockfd, ping, strlen(ping), 0)) < 0){
+                perror("Send");
+            }
+            if((recv(sockfd, buffer, BUF_SIZE, 0)) < 0){   
+                 perror("Receive");
+            }else {
+                printf("Target sends: %s\n", buffer);
+            }
+    }else {
             printf("Not listening for %s:%d\n", target, port);
             perror("Connect");
-            exit(0);
     }
-    printf("Port: %d was Open\n", port);
 
-    if((recv(sockfd, buffer, BUF_SIZE, 0)) < 0){   
-        perror("Receive");
-        exit(0);
-    }
-    printf("Client Sends:\n\t%s\n\n", buffer); 
-
-    if((send(sockfd, ping, strlen(ping), 0)) < 0){
-        perror("Send");
-        exit(0);
-    }
     close(sockfd);
 
 }
@@ -172,7 +173,7 @@ void grab_banners(const char target[INET_ADDRSTRLEN], const int start, const int
         "Accept: text/html,appllication/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
         "Accept-Language: en-US,en;q=0.5\r\n"
         "Accept-Encoding: gzip, deflate, br, zstd\r\n"
-        "Priorit: u=0\r\n";
+        "Priorit: u=0\r\n\r\n";
     char buffer[BUF_SIZE];
 
 
@@ -181,7 +182,6 @@ void grab_banners(const char target[INET_ADDRSTRLEN], const int start, const int
 
     for(int i = start; i <= end; i++){
         port = i;
-        printf("port: %d\n", port);
         sockfd = socket(AF_INET, SOCK_STREAM, 0); 
         if(sockfd < 0){
                 perror("Socket");
@@ -191,21 +191,23 @@ void grab_banners(const char target[INET_ADDRSTRLEN], const int start, const int
         addr.sin_port = htons(port);
 
         if((connect(sockfd, (struct sockaddr*)&addr, sizeof(addr))) >= 0){
-            printf("Port: %d was Open\n", port);
+            printf("Port: %d is Open\n", port);
 
+            if((send(sockfd, ping, strlen(ping), 0))<0){
+                perror("send");
+            }
             if((recv(sockfd, buffer, BUF_SIZE, 0)) < 0){   
                 perror("Receive");
                 //exit(0);
             }
-            
-            printf("Client Sends:\n\t%s\n\n", buffer); 
+            printf("Target Sends:\n\t%s\n\n", buffer); 
             i++;
-            port++;
+            port++; 
             continue;
             
         }
 
-        if((send(sockfd, ping, strlen(ping), 0)) < 0){
+       /* if((send(sockfd, ping, strlen(ping), 0)) < 0){
             perror("Send");
            // exit(0);
         }
@@ -213,7 +215,7 @@ void grab_banners(const char target[INET_ADDRSTRLEN], const int start, const int
             perror("Receive");
            // exit(0);
         }
-        printf("Clinet Sends:\n\t%s\n\n", buffer);
+        printf("Clinet Sends:\n\t%s\n\n", buffer);*/
         close(sockfd);
     }
 
