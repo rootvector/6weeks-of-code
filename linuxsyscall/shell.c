@@ -7,30 +7,66 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/wait.h>       // for wait function
+#include <fcntl.h>          // for file operations
+#include <sys/stat.h>
 
 #define BUF_SIZE 1024
 
 
 int main(int argc, char *argv[]){
-    char buffer[BUF_SIZE];
-    bool exit = false;
+    char command[BUF_SIZE] = "";
+    char buffer[BUF_SIZE] = "";
+    bool check_exit = false;
 
-    while(!exit){
+
+//    pid_t pid = fork();
+    while(!check_exit){
         printf("$ ");
         fflush(stdout);
-        if(fgets(buffer, BUF_SIZE, stdin) == 0){
+        if(fgets(command, BUF_SIZE, stdin) == 0){
             break;
         }
-        buffer[strcspn(buffer, "\n")] = '\0';
+        strcpy(buffer, command);
+        command[strcspn(command, "\n")] = '\0';
 
-        if((strcmp(buffer, "exit")) == 0){
-            exit = true;
+        if((strcmp(command, "exit")) == 0){
+            check_exit = true;
             puts("\nGood bye..!\n");
-            continue;
+            exit(0);
         }
-        if(strlen(buffer) > 0){
-            system(buffer);
-        }
+        
+
+/*        if(pid > 0){
+            // We are the parent
+            wait(NULL);
+        }else{*/
+            if(strlen(command) > 0){
+                // Runing a command
+
+                system(command);
+
+                // Opening a file 
+
+                int history_fd = open(".myshell_history", O_WRONLY | O_CREAT | O_APPEND, 0664);
+                if(history_fd == -1){
+                    perror("History file does not open\n");
+                }
+
+                // writting inside a file
+
+                snprintf(buffer, sizeof(command), "%s", command);
+                ssize_t byteswritten = write(history_fd, buffer, strlen(buffer));
+                if(byteswritten == -1){
+                    perror("Error: while writing command in history file\n");
+                }
+
+                // closing a file
+
+                close(history_fd);
+                printf("\n");
+            }
+       // }
     }
 
     return 0;
