@@ -14,17 +14,28 @@
 #define BUF_SIZE 1024
 #define HISTORY_FILE_PATH "/home/kali/.myshell_history"
 
+int handle_redirect(char *args[]);
 
 int main(int argc, char *argv[]){
     char command[BUF_SIZE] = "";
     char buffer[BUF_SIZE] = "";
     bool check_exit = false;
+    int interactive = 1;
 
-
+    if(argc > 1){
+        // First arg is the name of the script
+        if(freopen(argv[1], "r", stdin) == NULL){
+            fprintf(stderr, "can't read from script file %s\n", argv[1]);
+            fprintf(stderr, "Exiting.\n");
+            exit(1);
+        }
+        interactive = 0;
+        
+    }
     while(!check_exit){
-        printf("$ ");
+        if(interactive) printf("$ ");
         fflush(stdout);
-        if(fgets(command, BUF_SIZE, stdin) == 0){
+        if(fgets(command, BUF_SIZE, stdin) == NULL){
             break;
         }
         strcpy(buffer, command);
@@ -92,11 +103,33 @@ int main(int argc, char *argv[]){
         }else{
             if(strlen(command) > 0){
                 // Runing a command
+                if(handle_redirect(args) == -1){
+                    fprintf(stderr, "Could not redirect\n");
+                    exit(1);
+                }
 
                 execvp(args[0], args);
                 fprintf(stderr, "Could not exec %s\n", command);
                 printf("\n");
             }
+        }
+    }
+
+    return 0;
+}
+
+
+int handle_redirect(char *args[]){
+
+    for(int i=0; args[i] != NULL; i++){
+        if(strcmp(args[i], ">") == 0){
+            if(freopen(args[i+1], "w", stdout) == NULL) return -1;
+            args[i] = NULL;
+            return 1;
+        }else if(strcmp(args[i], ">>") == 0){
+            if(freopen(args[i+1], "a", stdout) == NULL) return -1;
+            args[i] = NULL;
+            return 1;
         }
     }
 
