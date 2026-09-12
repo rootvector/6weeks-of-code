@@ -171,7 +171,7 @@ int udpscan(int start, int end, char target[16]){
         send(sockfd, payload, strlen(payload), 0);
         usleep(100000);
         
-        char buffer[BUF_SIZE];
+        char buffer[BUFF_SIZE];
         res = recv(sockfd, buffer, sizeof(buffer), MSG_DONTWAIT);
        // printf("IP %0x8\n", addr.sin_addr.s_addr);
 
