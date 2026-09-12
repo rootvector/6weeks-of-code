@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     while(!exit){
         printf("$ ");
         fflush(stdout);
-        if(fgets(buffer, sizeof(BUF_SIZE), stdin) == 0){
+        if(fgets(buffer, BUF_SIZE, stdin) == 0){
             break;
         }
         buffer[strcspn(buffer, "\n")] = '\0';
