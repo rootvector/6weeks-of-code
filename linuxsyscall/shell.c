@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 
 #define BUF_SIZE 1024
+#define HISTORY_FILE_PATH "/home/kali/.myshell_history"
 
 
 int main(int argc, char *argv[]){
@@ -20,7 +21,7 @@ int main(int argc, char *argv[]){
     bool check_exit = false;
 
 
-//    pid_t pid = fork();
+    //pid_t pid = fork();
     while(!check_exit){
         printf("$ ");
         fflush(stdout);
@@ -29,11 +30,50 @@ int main(int argc, char *argv[]){
         }
         strcpy(buffer, command);
         command[strcspn(command, "\n")] = '\0';
+        // Opening a file 
+
+        int history_fd = open(HISTORY_FILE_PATH, O_WRONLY | O_CREAT | O_APPEND, 0664);
+        if(history_fd == -1){
+            perror("History file does not open\n");
+        }
+
+        // writting inside a file
+
+        snprintf(buffer, sizeof(command), "%s\n", command);
+        ssize_t byteswritten = write(history_fd, buffer, strlen(buffer));
+        if(byteswritten == -1){
+            perror("Error: while writing command in history file\n");
+        }
+
+        // closing a file
+
+        close(history_fd);
 
         if((strcmp(command, "exit")) == 0){
             check_exit = true;
             puts("\nGood bye..!\n");
             exit(0);
+        }
+        if((strcmp(command, "history")) == 0){
+            FILE *history_fd = fopen(HISTORY_FILE_PATH, "r");
+            if(history_fd == NULL){
+                fclose(history_fd);
+                perror("History file does not open\n");
+            }
+            
+            char *line = NULL;
+            int line_count = 1;
+            ssize_t readbytes;
+            ssize_t len = 0;
+
+            while((readbytes = getline(&line, &len, history_fd)) != -1){
+                printf("%d %s", line_count, line);
+                line_count++;
+            }
+            printf("\n");
+            free(line);
+            fclose(history_fd);
+            continue;
         }
         
 
@@ -46,25 +86,7 @@ int main(int argc, char *argv[]){
 
                 system(command);
 
-                // Opening a file 
-
-                int history_fd = open(".myshell_history", O_WRONLY | O_CREAT | O_APPEND, 0664);
-                if(history_fd == -1){
-                    perror("History file does not open\n");
-                }
-
-                // writting inside a file
-
-                snprintf(buffer, sizeof(command), "%s", command);
-                ssize_t byteswritten = write(history_fd, buffer, strlen(buffer));
-                if(byteswritten == -1){
-                    perror("Error: while writing command in history file\n");
-                }
-
-                // closing a file
-
-                close(history_fd);
-                printf("\n");
+                                printf("\n");
             }
        // }
     }
