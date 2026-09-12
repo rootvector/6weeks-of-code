@@ -21,7 +21,6 @@ int main(int argc, char *argv[]){
     bool check_exit = false;
 
 
-    //pid_t pid = fork();
     while(!check_exit){
         printf("$ ");
         fflush(stdout);
@@ -30,6 +29,15 @@ int main(int argc, char *argv[]){
         }
         strcpy(buffer, command);
         command[strcspn(command, "\n")] = '\0';
+
+        // Split buf into args
+        char *args[20];
+        int nargs = 0;
+
+        args[nargs] = strtok(command, " ");
+        while(args[nargs] != NULL){
+            args[++nargs] = strtok(NULL, " ");
+        }
         // Opening a file 
 
         int history_fd = open(HISTORY_FILE_PATH, O_WRONLY | O_CREAT | O_APPEND, 0664);
@@ -77,18 +85,19 @@ int main(int argc, char *argv[]){
         }
         
 
-/*        if(pid > 0){
+        pid_t pid = fork();
+        if(pid > 0){
             // We are the parent
             wait(NULL);
-        }else{*/
+        }else{
             if(strlen(command) > 0){
                 // Runing a command
 
-                system(command);
-
-                                printf("\n");
+                execvp(args[0], args);
+                fprintf(stderr, "Could not exec %s\n", command);
+                printf("\n");
             }
-       // }
+        }
     }
 
     return 0;
