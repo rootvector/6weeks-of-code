@@ -131,7 +131,7 @@ int handle_redirect(char *args[]){
             args[i] = NULL;
             return 1;
         }
-    }
+   }
 
     return 0;
 }
